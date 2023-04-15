@@ -3,4 +3,4 @@ Runs a timer for a specified amount of time, for a specified number of minutes. 
 
 ## Configurations
 The config.py module is meant for constant values to be stored. These values will never change after the program has begun.
-Aside from the reps and duration of the repetitions, other values like the time for a break are specified within the config.py file.
+Aside from the repetitions and duration of the repetitions, other values like the time for a break are specified within the config.py file.
