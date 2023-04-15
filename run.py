@@ -9,6 +9,17 @@
 import time
 import config
 
+print(
+	'''
+   .----.
+   |C>_ |
+ __|____|__         Study Time!
+|  ______--|
+`-/.::::.\-'a
+ `--------'
+	'''
+)
+
 user_input = input('Repetitions,minutes: ')
 repetitions = None
 minutes = None
