@@ -7,30 +7,31 @@
 	Date created: 04.15.2023
 '''
 import time
+import config
 
-user_input = input('Repititions,minutes: ')
-repititions = None
+user_input = input('Repetitions,minutes: ')
+repetitions = None
 minutes = None
-BREAK_TIME = 1  # in minutes
+BREAK_TIME = config.DESIRED_BREAK_TIME  # in minutes
 
-try: # Attempt to split the input into repitions and minutes.
+try: # Attempt to split the input into repetitions and minutes.
 	parts = user_input.split(',')
 	
-	#remove and whitespace and then convert the values to numbers.
-	repititions = int(parts[0])
+	#remove and white space and then convert the values to numbers.
+	repetitions = int(parts[0])
 	minutes = int(parts[1])
 except Exception as e: # Naked exception
 	print(e)
 	print('Something occurred. Cannot process input.\nDefaulting to 3,30.')
-	repititions = 3
+	repetitions = 3
 	minutes = 30
 
-# Run the loop for the amount of repititions specified.
-for i in range(repititions):
-	print(f'Beginning timer #{i + 1}')
+# Run the loop for the amount of repetitions specified.
+for i in range(repetitions):
+	print(f'Beginning repetition #{i + 1}')
 	time.sleep(minutes * 60) # The user will pass in a value in minutes. A conversion is needed.
 	
-	print(f'Done! Taking a breaking for {BREAK_TIME} minutes.')
+	print(f'Done! Taking a breaking for {BREAK_TIME} minute(s).')
 	time.sleep(BREAK_TIME * 60)
 	
 	print('\n\n\n\n') # Print some spacing.
