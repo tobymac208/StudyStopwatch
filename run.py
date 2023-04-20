@@ -65,6 +65,9 @@ $$$$$Y'          $$$$$          `Y$$$$$
 	print(f'Done! Taking a break for {BREAK_TIME} minute(s).')
 	time.sleep(BREAK_TIME * 60)
 
-	print('\n\n\n\n') # Print some spacing.
+    while len(input().strip()) < 1:
+        # Make sure the user actually typed something. Otherwise, don't continue studying.
+        continue
+	print('Continuing...\n\n\n\n') # Print some spacing.
 
 print('Done! Your study period has completed. Please go enjoy your day now.')
