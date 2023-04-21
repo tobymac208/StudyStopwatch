@@ -43,7 +43,7 @@ for i in range(repetitions):
 	time.sleep(minutes * 60) # The user will pass in a value in minutes. A conversion is needed.
 	
 	print('''
-
+				   *
 		   	  $$ $$$$$ $$
               $$ $$$$$ $$
              .$$ $$$$$ $$.
@@ -59,15 +59,15 @@ for i in range(repetitions):
   ,s$$$$$$$'     $$$$$     `$$$$$$$s.
 $$$$$$$$$'       $$$$$       `$$$$$$$$$
 $$$$$Y'          $$$$$          `Y$$$$$
-
 		'''
 	)
-	print(f'Done! Taking a break for {BREAK_TIME} minute(s).')
 	time.sleep(BREAK_TIME * 60)
-
-    while len(input().strip()) < 1:
-        # Make sure the user actually typed something. Otherwise, don't continue studying.
-        continue
+    
+    # Notify the user that the break is done.
+	print('The break is over. Type any phrase and hit ENTER to continue!')
+	while len(input().strip()) < 1:
+		# Make sure the user actually typed something. Otherwise, don't continue studying.
+		continue
 	print('Continuing...\n\n\n\n') # Print some spacing.
 
 print('Done! Your study period has completed. Please go enjoy your day now.')
