@@ -40,8 +40,12 @@ except Exception as e: # Naked exception
 # Run the loop for the amount of repetitions specified.
 for i in range(repetitions):
 	print(f'Beginning repetition #{i + 1}')
-	time.sleep(minutes * 60) # The user will pass in a value in minutes. A conversion is needed.
-	
+
+	for i in range(minutes): # Run for the duration of each study period.
+		time.sleep(1 * 60) # Pause for one minute.
+		# Notify the user whenever one minute has passed.
+		print(i+1)
+
 	print('''
 				   *
 		   	  $$ $$$$$ $$
