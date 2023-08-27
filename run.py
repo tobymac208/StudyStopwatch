@@ -12,6 +12,8 @@ import config
 import json
 import uuid
 
+import traceback
+
 
 def ask_user_for_control_variables():
     '''
@@ -44,9 +46,9 @@ def ask_user_for_control_variables():
 
 def format_user_input_to_json(data_structure):
     '''
-                Description: Ensure that the provided data structure properly formats to JSON.
+                Description: Ensure that the provided data structure properly formats to a dictionary.
 
-                Returns: JSON representation of the provided data structure.
+                Returns: dictionary representation of the provided data structure.
     '''
     reps = None
     minutes = None
@@ -67,20 +69,22 @@ def format_user_input_to_json(data_structure):
         return None
     
     try:
-        current_logs = json.load(open('logfile.json', 'r').read()) # Read everything in from the file and convert it to a dictionary.
+        with open('logfile.json') as file:
+            jsonData = json.load(file)
+            print(f'{jsonData} here is the data')
+            
+            current_logs = json.loads(jsonData)
     except Exception as e:
-        print(f'{e}. There was an error. It\'s likely that there are no entries in the file or that the file does not exist.')
+        traceback.print_exc(e)
     
     current_logs[str(unique_id)] = {
         "name": subject,
         "repetitions": reps,
         "minutes": minutes
     }
-    
-    jsonObject = json.dumps(current_logs) # Convert the whole dictionary back into a JSON object.
 
     # Return the JSON object to the caller.
-    return jsonObject
+    return current_logs
 
 
 def log_info(information_tuple):
@@ -89,10 +93,10 @@ def log_info(information_tuple):
     '''
     with open("logfile.json", "w+") as file:
         # Convert the dictionary into a json object.
-        jsonObj = format_user_input_to_json(information_tuple)
-
+        dictionaryObj = format_user_input_to_json(information_tuple)
+    
         # Write the JSON data to the JSON logging file.
-        json.dump(jsonObj, file)
+        json.dump(dictionaryObj, file)
 
 
 def main():
@@ -121,7 +125,7 @@ def main():
         print(f'Beginning repetition #{i + 1}')
 
         for i in range(minutes):  # Run for the duration of each study period.
-            time.sleep(1 * 60)  # Pause for one minute.
+            time.sleep(60)  # Pause for one minute.
             # Notify the user whenever one minute has passed.
             print(i+1)
 
