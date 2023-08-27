@@ -1,5 +1,5 @@
 # Specific logging files
-logfile.json
+# logfile.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
