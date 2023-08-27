@@ -40,12 +40,49 @@ def ask_user_for_control_variables():
     return (repetitions, minutes, subject)
 
 
+def format_user_input_to_json(data_structure):
+    '''
+		Description: Ensure that the provided data structure properly formats to JSON.
+  
+		Returns: JSON representation of the provided data structure.
+    '''
+    reps = None
+    minutes = None
+    subject = None
+    
+    # Parse the data structure's information into fields.
+    try:
+        reps = int(data_structure[0])
+        minutes = int(data_structure[1])
+        subject = data_structure[2]
+    except TypeError as error:
+        print(f'{error}. There was an error. Please ensure the user input was correct.')
+    
+    # There was an exception. Return nothing to the caller.
+    if reps is None and minutes is None and subject is None:
+        return None
+    
+    # Convert the data structure into a dictionary and then into a JSON object.
+    dictionary_structure = {
+		"name": subject,
+		"repetitions": reps,
+		"minutes": minutes
+	}
+    jsonObject = json.dumps(dictionary_structure)
+    
+    # Return the JSON object to the caller.
+    return jsonObject
+
+
 def log_info(information_tuple):
     '''
                 Regardless of the amount of information, log it to a text file for later parsing.
     '''
     with open("logfile.json", "w+") as file:
-        jsonObj = json.dumps(information_tuple)
+        # Convert the dictionary into a json object.
+        jsonObj = format_user_input_to_json(information_tuple)
+        
+        # Write the JSON data to the JSON logging file.
         json.dump(jsonObj, file)
 
 
