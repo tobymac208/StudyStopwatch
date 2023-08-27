@@ -8,7 +8,9 @@
 '''
 import time
 import config
+
 import json
+import uuid
 
 
 def ask_user_for_control_variables():
@@ -49,6 +51,7 @@ def format_user_input_to_json(data_structure):
     reps = None
     minutes = None
     subject = None
+    unique_id = uuid.uuid4()
     
     # Parse the data structure's information into fields.
     try:
@@ -64,9 +67,11 @@ def format_user_input_to_json(data_structure):
     
     # Convert the data structure into a dictionary and then into a JSON object.
     dictionary_structure = {
-		"name": subject,
-		"repetitions": reps,
-		"minutes": minutes
+        str(unique_id) : {
+            "name": subject,
+		    "repetitions": reps,
+		    "minutes": minutes   
+        }
 	}
     jsonObject = json.dumps(dictionary_structure)
     
@@ -86,7 +91,8 @@ def log_info(information_tuple):
         json.dump(jsonObj, file)
 
 
-print(
+def main():
+    print(
         '''
    .----.
    |C>_ |
@@ -145,3 +151,12 @@ print(
     f'Done! Your study period for {subject} has completed. Please go enjoy your day now.')
 
 log_info((repetitions, minutes, subject))
+
+
+def TEST_CASES():
+    '''
+        Runs a string of tests to test the overall program's functionality.
+    '''
+    # TODO: Implement a series of test cases.
+
+main()
