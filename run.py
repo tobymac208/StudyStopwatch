@@ -67,7 +67,7 @@ def format_user_input_to_json(data_structure):
         "name": data_structure[2],
         "repetitions": data_structure[0],
         "minutes": data_structure[1],
-        "date": date.today()
+        "date": str(date.today())
     }
 
     # Return the JSON object to the caller.
