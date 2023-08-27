@@ -52,6 +52,7 @@ def format_user_input_to_json(data_structure):
     minutes = None
     subject = None
     unique_id = uuid.uuid4()
+    current_logs = {}
 
     # Parse the data structure's information into fields.
     try:
@@ -64,16 +65,19 @@ def format_user_input_to_json(data_structure):
     # There was an exception. Return nothing to the caller.
     if reps is None and minutes is None and subject is None:
         return None
-
-    # Convert the data structure into a dictionary and then into a JSON object.
-    dictionary_structure = {
-        str(unique_id): { # https://docs.python.org/3/library/uuid.html
-            "name": subject,
-            "repetitions": reps,
-            "minutes": minutes
-        }
+    
+    try:
+        current_logs = json.load(open('logfile.json', 'r').read()) # Read everything in from the file and convert it to a dictionary.
+    except Exception as e:
+        print(f'{e}. There was an error. It\'s likely that there are no entries in the file or that the file does not exist.')
+    
+    current_logs[str(unique_id)] = {
+        "name": subject,
+        "repetitions": reps,
+        "minutes": minutes
     }
-    jsonObject = json.dumps(dictionary_structure)
+    
+    jsonObject = json.dumps(current_logs) # Convert the whole dictionary back into a JSON object.
 
     # Return the JSON object to the caller.
     return jsonObject
@@ -104,54 +108,54 @@ def main():
     )
 
 
-repetitions = None
-minutes = None
-subject = None  # The subject the user is studying.
-BREAK_TIME = config.DESIRED_BREAK_TIME  # in minutes
+    repetitions = None
+    minutes = None
+    subject = None  # The subject the user is studying.
+    BREAK_TIME = config.DESIRED_BREAK_TIME  # in minutes
 
-# Returns a tuple of required information.
-repetitions, minutes, subject = ask_user_for_control_variables()
+    # Returns a tuple of required information.
+    repetitions, minutes, subject = ask_user_for_control_variables()
 
-# Run the loop for the amount of repetitions specified.
-for i in range(repetitions):
-    print(f'Beginning repetition #{i + 1}')
+    # Run the loop for the amount of repetitions specified.
+    for i in range(repetitions):
+        print(f'Beginning repetition #{i + 1}')
 
-    for i in range(minutes):  # Run for the duration of each study period.
-        time.sleep(1 * 60)  # Pause for one minute.
-        # Notify the user whenever one minute has passed.
-        print(i+1)
+        for i in range(minutes):  # Run for the duration of each study period.
+            time.sleep(1 * 60)  # Pause for one minute.
+            # Notify the user whenever one minute has passed.
+            print(i+1)
 
-    print('''
-              $$ $$$$$ $$
-              $$ $$$$$ $$
-             .$$ $$$$$ $$.
-             :$$ $$$$$ $$:
-             $$$ $$$$$ $$$
-             $$$ $$$$$ $$$
-            ,$$$ $$$$$ $$$.                          Break Time. Play some games!
-           ,$$$$ $$$$$ $$$$.
-          ,$$$$; $$$$$ :$$$$.
-         ,$$$$$  $$$$$  $$$$$.
-       ,$$$$$$'  $$$$$  `$$$$$$.
-     ,$$$$$$$'   $$$$$   `$$$$$$$.
-  ,s$$$$$$$'     $$$$$     `$$$$$$$s.
-$$$$$$$$$'       $$$$$       `$$$$$$$$$
-$$$$$Y'          $$$$$          `Y$$$$$
-		'''
-          )
-    time.sleep(BREAK_TIME * 60)  # waits for the break time
+        print('''
+                  $$ $$$$$ $$
+                  $$ $$$$$ $$
+                 .$$ $$$$$ $$.
+                 :$$ $$$$$ $$:
+                 $$$ $$$$$ $$$
+                 $$$ $$$$$ $$$
+                ,$$$ $$$$$ $$$.                          Break Time. Play some games!
+               ,$$$$ $$$$$ $$$$.
+              ,$$$$; $$$$$ :$$$$.
+             ,$$$$$  $$$$$  $$$$$.
+           ,$$$$$$'  $$$$$  `$$$$$$.
+         ,$$$$$$$'   $$$$$   `$$$$$$$.
+      ,s$$$$$$$'     $$$$$     `$$$$$$$s.
+    $$$$$$$$$'       $$$$$       `$$$$$$$$$
+    $$$$$Y'          $$$$$          `Y$$$$$
+	    	'''
+              )
+        time.sleep(BREAK_TIME * 60)  # waits for the break time
 
-    # Notify the user that the break is done.
-    print('The break is over. Type any phrase and hit ENTER to continue!')
-    while len(input().strip()) < 1:
-        continue  # validate that the input is not empty
+        # Notify the user that the break is done.
+        print('The break is over. Type any phrase and hit ENTER to continue!')
+        while len(input().strip()) < 1:
+            continue  # validate that the input is not empty
 
-    print('Continuing...\n\n\n\n')  # Print some spacing.
+        print('Continuing...\n\n\n\n')  # Print some spacing.
 
-print(
-    f'Done! Your study period for {subject} has completed. Please go enjoy your day now.')
+    print(
+        f'Done! Your study period for {subject} has completed. Please go enjoy your day now.')
 
-log_info((repetitions, minutes, subject))
+    log_info((repetitions, minutes, subject))
 
 
 def TEST_CASES():
