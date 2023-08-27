@@ -9,6 +9,35 @@
 import time
 import config
 
+
+def validate_input():
+    '''
+		Returns A list of items. 
+  				The items are either what the user entered or default values if the user entered invalid items.
+    '''
+    repetitions = None
+    minutes = None
+    subject = None
+    
+    user_input = input('Enter the number of reps, the length for each rep, and the subject you are studying.\nRepetitions,minutes,subject: ')
+    
+    try: # Attempt to split the input into repetitions and minutes.
+        parts = user_input.split(',') 
+        
+        repetitions = int(parts[0])
+        minutes = int(parts[1])
+        subject = parts[2]
+    
+    except Exception as e:
+        print(e) # print the exception
+        print('Something occurred. Cannot process input.\nDefaulting to 3,30.')
+        repetitions = 3
+        minutes = 30
+        subject = "Unspecified"
+    
+    return (repetitions, minutes, subject)
+
+
 print(
 	'''
    .----.
@@ -20,22 +49,12 @@ print(
 	'''
 )
 
-user_input = input('Repetitions,minutes: ')
 repetitions = None
 minutes = None
+subject = None # The subject the user is studying.
 BREAK_TIME = config.DESIRED_BREAK_TIME  # in minutes
 
-try: # Attempt to split the input into repetitions and minutes.
-	parts = user_input.split(',')
-	
-	#remove and white space and then convert the values to numbers.
-	repetitions = int(parts[0])
-	minutes = int(parts[1])
-except Exception as e: # Naked exception
-	print(e)
-	print('Something occurred. Cannot process input.\nDefaulting to 3,30.')
-	repetitions = 3
-	minutes = 30
+repetitions, minutes, subject = validate_input() # Returns a tuple of required information.
 
 # Run the loop for the amount of repetitions specified.
 for i in range(repetitions):
@@ -64,13 +83,12 @@ $$$$$$$$$'       $$$$$       `$$$$$$$$$
 $$$$$Y'          $$$$$          `Y$$$$$
 		'''
 	)
-	time.sleep(BREAK_TIME * 60)
+	time.sleep(BREAK_TIME * 60) # waits for the break time
     
     # Notify the user that the break is done.
 	print('The break is over. Type any phrase and hit ENTER to continue!')
-	while len(input().strip()) < 1:
-		# Make sure the user actually typed something. Otherwise, don't continue studying.
-		continue
+	while len(input().strip()) < 1: continue # validate that the input is not empty
+ 
 	print('Continuing...\n\n\n\n') # Print some spacing.
 
-print('Done! Your study period has completed. Please go enjoy your day now.')
+print(f'Done! Your study period for {subject} has completed. Please go enjoy your day now.')
