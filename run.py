@@ -67,7 +67,7 @@ def format_user_input_to_json(data_structure):
 
     # Convert the data structure into a dictionary and then into a JSON object.
     dictionary_structure = {
-        str(unique_id): {
+        str(unique_id): { # https://docs.python.org/3/library/uuid.html
             "name": subject,
             "repetitions": reps,
             "minutes": minutes
