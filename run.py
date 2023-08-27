@@ -14,6 +14,7 @@ import uuid
 
 import traceback
 from os.path import exists
+from datetime import date
 
 
 def ask_user_for_control_variables():
@@ -65,7 +66,8 @@ def format_user_input_to_json(data_structure):
     current_logs[str(unique_id)] = {
         "name": data_structure[2],
         "repetitions": data_structure[0],
-        "minutes": data_structure[1]
+        "minutes": data_structure[1],
+        "date": date.today()
     }
 
     # Return the JSON object to the caller.
