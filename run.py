@@ -69,7 +69,7 @@ def format_user_input_to_json(data_structure, filename):
             with open(filename) as file:
                 current_logs = json.load(file)
         except json.decoder.JSONDecodeError as e:
-            remove(filename) # the file is empty. Remove the file.
+            remove(filename)  # the file is empty. Remove the file.
         except Exception as e:
             traceback.print_exc(e)
 
