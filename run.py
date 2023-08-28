@@ -85,7 +85,7 @@ def log_info(information_tuple, filename):
     '''
     # Convert the dictionary into a json object.
     dictionaryObj = format_user_input_to_json(information_tuple, filename)
-    
+
     with open(filename, "w+") as file:
         # Write the JSON data to the JSON logging file.
         json.dump(dictionaryObj, file)
@@ -159,10 +159,10 @@ def TEST_CASES():
     '''
     repetitions = random.choice([1, 2, 3, 4, 5, 6, 7, 8, 9])
     minutes = random.choice([1, 2, 3, 4, 5, 6, 7, 8, 9])
-    subject = random.choice(['math', 'english', 'reading', 'nothing'])  # The subject the user is studying.
-    
+    # The subject the user is studying.
+    subject = random.choice(['math', 'english', 'reading', 'nothing'])
+
     log_info((repetitions, minutes, subject), TEST_LOGGING_FILE)
 
 
-for _ in range(3000):
-    TEST_CASES()
+main()
