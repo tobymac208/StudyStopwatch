@@ -15,6 +15,11 @@ import uuid
 import traceback
 from os.path import exists
 from datetime import date
+import random
+
+
+LOGGING_FILE = "logfile.json"
+TEST_LOGGING_FILE = "test_logfile.json"
 
 
 def ask_user_for_control_variables():
@@ -46,7 +51,7 @@ def ask_user_for_control_variables():
     return (repetitions, minutes, subject)
 
 
-def format_user_input_to_json(data_structure):
+def format_user_input_to_json(data_structure, filename):
     '''
                 Description: Ensure that the provided data structure properly formats to a dictionary.
 
@@ -56,9 +61,9 @@ def format_user_input_to_json(data_structure):
     current_logs = {}
 
     # If the file exists, then
-    if exists("logfile.json"):
+    if exists(filename):
         try:
-            with open('logfile.json') as file:
+            with open(filename) as file:
                 current_logs = json.load(file)
         except Exception as e:
             traceback.print_exc(e)
@@ -74,14 +79,14 @@ def format_user_input_to_json(data_structure):
     return current_logs
 
 
-def log_info(information_tuple):
+def log_info(information_tuple, filename):
     '''
                 Regardless of the amount of information, log it to a text file for later parsing.
     '''
     # Convert the dictionary into a json object.
-    dictionaryObj = format_user_input_to_json(information_tuple)
+    dictionaryObj = format_user_input_to_json(information_tuple, filename)
     
-    with open("logfile.json", "w+") as file:
+    with open(filename, "w+") as file:
         # Write the JSON data to the JSON logging file.
         json.dump(dictionaryObj, file)
 
@@ -145,14 +150,19 @@ def main():
     print(
         f'Done! Your study period for {subject} has completed. Please go enjoy your day now.')
 
-    log_info((repetitions, minutes, subject))
+    log_info((repetitions, minutes, subject), LOGGING_FILE)
 
 
 def TEST_CASES():
     '''
-        Runs a string of tests to test the overall program's functionality.
+        Runs a test one the data.
     '''
-    # TODO: Implement a series of test cases.
+    repetitions = random.choice([1, 2, 3, 4, 5, 6, 7, 8, 9])
+    minutes = random.choice([1, 2, 3, 4, 5, 6, 7, 8, 9])
+    subject = random.choice(['math', 'english', 'reading', 'nothing'])  # The subject the user is studying.
+    
+    log_info((repetitions, minutes, subject), TEST_LOGGING_FILE)
 
 
-main()
+for _ in range(3000):
+    TEST_CASES()
