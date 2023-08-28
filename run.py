@@ -10,7 +10,7 @@ import time
 import config
 
 import json
-import uuid
+from uuid import uuid4
 
 import traceback
 
@@ -18,7 +18,7 @@ from os.path import exists
 from os import remove
 
 from datetime import date
-import random
+from random import choice
 
 
 LOGGING_FILE = "logfile.json"
@@ -60,7 +60,7 @@ def format_user_input_to_json(data_structure, filename):
 
                 Returns: dictionary representation of the provided data structure.
     '''
-    unique_id = uuid.uuid4()
+    unique_id = uuid4()
     current_logs = {}
 
     # If the file exists, then
@@ -162,10 +162,10 @@ def TEST_CASES():
     '''
         Runs a test one the data.
     '''
-    repetitions = random.choice([1, 2, 3, 4, 5, 6, 7, 8, 9])
-    minutes = random.choice([1, 2, 3, 4, 5, 6, 7, 8, 9])
+    repetitions = choice([1, 2, 3, 4, 5, 6, 7, 8, 9])
+    minutes = choice([1, 2, 3, 4, 5, 6, 7, 8, 9])
     # The subject the user is studying.
-    subject = random.choice(['math', 'english', 'reading', 'nothing'])
+    subject = choice(['math', 'english', 'reading', 'nothing'])
 
     log_info((repetitions, minutes, subject), TEST_LOGGING_FILE)
 
