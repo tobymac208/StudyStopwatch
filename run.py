@@ -97,6 +97,10 @@ def log_info(information_tuple, filename):
 
 
 def main():
+    '''
+        Main program
+    '''
+    
     print(
         '''
    .----.
@@ -169,5 +173,10 @@ def TEST_CASES():
 
     log_info((repetitions, minutes, subject), TEST_LOGGING_FILE)
 
+IS_TESTING = False # Controls whether to run the test code or not.
 
-main()
+if IS_TESTING:
+    for _ in range(150):
+        TEST_CASES()
+else:
+    main()
