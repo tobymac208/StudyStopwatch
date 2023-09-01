@@ -119,6 +119,9 @@ def main():
 
     # Returns a tuple of required information.
     repetitions, minutes, subject = ask_user_for_control_variables()
+    
+    # Print control variables as a response to the user's input. The lets them know what they entered.
+    print(f'You want to study for {minutes}, {repetitions} times. You want to study for {subject}. Thanks!')
 
     # Run the loop for the amount of repetitions specified.
     for i in range(repetitions):
