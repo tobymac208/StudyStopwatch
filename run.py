@@ -100,7 +100,7 @@ def main():
     '''
         Main program
     '''
-    
+
     print(
         '''
    .----.
@@ -119,9 +119,10 @@ def main():
 
     # Returns a tuple of required information.
     repetitions, minutes, subject = ask_user_for_control_variables()
-    
+
     # Print control variables as a response to the user's input. The lets them know what they entered.
-    print(f'You want to study for {minutes} minute(s), {repetitions} time(s). You want to study for {subject}. Thanks!')
+    print(
+        f'You want to study for {minutes} minute(s), {repetitions} time(s). You want to study for {subject}. Thanks!')
 
     # Run the loop for the amount of repetitions specified.
     for i in range(repetitions):
@@ -176,7 +177,8 @@ def TEST_CASES():
 
     log_info((repetitions, minutes, subject), TEST_LOGGING_FILE)
 
-IS_TESTING = False # Controls whether to run the test code or not.
+
+IS_TESTING = False  # Controls whether to run the test code or not.
 
 if IS_TESTING:
     for _ in range(150):
