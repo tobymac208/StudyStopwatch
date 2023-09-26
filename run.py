@@ -124,9 +124,12 @@ def main():
     
     # TODO: Fix the input validation later.
     if number_of_args == 4:
-        repetitions = int(CLI_arguments[1])
-        minutes = int(CLI_arguments[2])
-        subject = CLI_arguments[3]
+        try:
+            repetitions = int(CLI_arguments[1])
+            minutes = int(CLI_arguments[2])
+            subject = CLI_arguments[3]
+        except:
+            print('There was a problem with the command line arguments. Please try again.')
     else:
         # Returns a tuple of required information.
         repetitions, minutes, subject = ask_user_for_control_variables()
@@ -174,7 +177,9 @@ def main():
         print(
             f'Done! Your study period for {subject} has completed. Please go enjoy your day now.')
 
-    log_info((repetitions, minutes, subject), LOGGING_FILE)
+    # Shorthand way of checking that the arguments are not null.
+    if repetitions and minutes and subject:
+        log_info((repetitions, minutes, subject), LOGGING_FILE)
 
 
 def TEST_CASES():
