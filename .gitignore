@@ -1,3 +1,6 @@
+# Executables that pertain to system specific deployments.
+bin/
+
 .vscode
 
 # Specific logging files
