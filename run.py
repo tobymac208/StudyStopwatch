@@ -142,37 +142,40 @@ def main():
         for i in range(repetitions):
             print(f'Beginning repetition #{i + 1}')
 
-            for i in range(minutes):  # Run for the duration of each study period.
+            for j in range(minutes):  # Run for the duration of each study period.
                 time.sleep(60)  # Pause for one minute.
                 # Notify the user whenever one minute has passed.
-                print(i+1)
+                print(rf'{j+1}')
 
-            print('''
-                    $$ $$$$$ $$
-                    $$ $$$$$ $$
-                   .$$ $$$$$ $$.
-                   :$$ $$$$$ $$:
-                   $$$ $$$$$ $$$
-                   $$$ $$$$$ $$$
-                  ,$$$ $$$$$ $$$.                          Break Time. Play some games!
-                 ,$$$$ $$$$$ $$$$.
-                ,$$$$; $$$$$ :$$$$.
-               ,$$$$$  $$$$$  $$$$$.
-             ,$$$$$$'  $$$$$  `$$$$$$.
-           ,$$$$$$$'   $$$$$   `$$$$$$$.
-        ,s$$$$$$$'     $$$$$     `$$$$$$$s.
-      $$$$$$$$$'       $$$$$       `$$$$$$$$$
-      $$$$$Y'          $$$$$          `Y$$$$$
-                '''
-                )
-            time.sleep(BREAK_TIME * 60)  # waits for the break time
+            # Only take a break if it is NOT the last repetition.
+            # Where i+1 is the current rep count.
+            if (i+1) != repetitions:
+                print('''
+                        $$ $$$$$ $$
+                        $$ $$$$$ $$
+                       .$$ $$$$$ $$.
+                       :$$ $$$$$ $$:
+                       $$$ $$$$$ $$$
+                       $$$ $$$$$ $$$
+                      ,$$$ $$$$$ $$$.                          Break Time. Play some games!
+                     ,$$$$ $$$$$ $$$$.
+                    ,$$$$; $$$$$ :$$$$.
+                   ,$$$$$  $$$$$  $$$$$.
+                 ,$$$$$$'  $$$$$  `$$$$$$.
+               ,$$$$$$$'   $$$$$   `$$$$$$$.
+            ,s$$$$$$$'     $$$$$     `$$$$$$$s.
+          $$$$$$$$$'       $$$$$       `$$$$$$$$$
+          $$$$$Y'          $$$$$          `Y$$$$$
+                    '''
+                    )
+                time.sleep(BREAK_TIME * 60)  # waits for the break time
 
-            # Notify the user that the break is done.
-            print('The break is over. Type any phrase and hit ENTER to continue!')
-            while len(input().strip()) < 1:
-                continue  # validate that the input is not empty
+                # Notify the user that the break is done.
+                print('The break is over. Type any phrase and hit ENTER to continue!')
+                while len(input().strip()) < 1:
+                    continue  # validate that the input is not empty
 
-            print('Continuing...\n\n\n\n')  # Print some spacing.
+                print('Continuing...\n\n\n\n')  # Print some spacing.
 
         print(
             f'Done! Your study period for {subject} has completed. Please go enjoy your day now.')
