@@ -145,7 +145,7 @@ def main():
             for j in range(minutes):  # Run for the duration of each study period.
                 time.sleep(60)  # Pause for one minute.
                 # Notify the user whenever one minute has passed.
-                print(rf'{j+1}')
+                print(f'{j+1}', end=" ", flush=True)
 
             # Only take a break if it is NOT the last repetition.
             # Where i+1 is the current rep count.
