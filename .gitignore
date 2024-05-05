@@ -1,5 +1,6 @@
 # Executables that pertain to system specific deployments.
 bin/
+testing/
 
 .vscode
 
