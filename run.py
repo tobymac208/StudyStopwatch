@@ -178,11 +178,13 @@ def main():
                 print('Continuing...\n\n\n\n')  # Print some spacing.
 
         print(
-            f'Done! Your study period for {subject} has completed. Please go enjoy your day now.')
+            f'\n\nDone! Your study period for {subject} has completed. Please go enjoy your day now.')
 
     # Shorthand way of checking that the arguments are not null.
     if repetitions and minutes and subject:
         log_info((repetitions, minutes, subject), LOGGING_FILE)
+    else:
+        print("ERROR: A required value was not given. Required values are repitions, minutes, and subject.")
 
 
 def TEST_CASES():
