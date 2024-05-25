@@ -4,6 +4,7 @@ let started = false;
 
 const timer = () => {
     started = true;
+    document.getElementById("currenttime").style.color = "red";
 
     let timer = setInterval(() => {
         document.getElementById("currenttime").value = timeTracker;
@@ -12,11 +13,12 @@ const timer = () => {
         if(timeTracker > minutes || !started){
             clearInterval(timer);
         }
-    }, 1000);
+    }, 60*1000); // wait for a minute
 }
 
 const reset = () => {
     started = false;
     timeTracker = 0;
     document.getElementById("currenttime").value = timeTracker;
+    document.getElementById("currenttime").style.color = "black";
 };
