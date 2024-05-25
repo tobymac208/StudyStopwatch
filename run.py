@@ -176,24 +176,27 @@ def main():
             print(
                 f'\n\nDone! Your study period for {subject} has completed. Please go enjoy your day now.')
         elif study_type == STUDY_TYPES[1]:
+            print("You chose the continuous Pomodoro option! Here it goes...")
+
             SESSION_LENGTH = 25 # in minutes
             BREAK_TIME = 5 # in minutes
             session_count = 0 # keeps track of how many times the user studied
 
             while True:
+                session_count = session_count + 1
+                print(f"Here comes session #{session_count}.")
+
                 for i in range(SESSION_LENGTH):
-                    session_count = session_count + 1
-                    print(f"Here comes the {session_count} session!")
                     time.sleep(60)  # Pause for one minute.
                     # Notify the user whenever one minute has passed.
-                    print(f'{j+1}', end=" ", flush=True)
+                    print(f'{i+1}', end=" ", flush=True)
 
                 # break time!
                 print("Break time!")
                 time.sleep( BREAK_TIME * 60 )
                 print('The break is over. Type any phrase and hit ENTER to continue, or type EXIT to stop!')
                 continue_or_exit = input('Phrase or "EXIT": ')
-                if continue_or_exit.upper == EXIT:
+                if continue_or_exit.upper == "EXIT":
                     break
                 else:
                     continue
