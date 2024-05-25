@@ -1,4 +1,33 @@
+/**
+
+.first-color { 
+	background: #ececec; 
+}
+	
+.second-color { 
+	background: #9fd3c7; 
+}
+
+.third-color { 
+	background: #385170; 
+}
+
+.fourth-color { 
+	background: #142d4c; 
+}
+
+**/
+
+* {
+    background: #ececec;
+    font-size: 40px;
+}
+
 .container {
     text-align: center;
     margin: 15px;
+}
+
+#currenttime {
+    max-width: 80px;
 }

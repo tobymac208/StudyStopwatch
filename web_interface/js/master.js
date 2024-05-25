@@ -1,28 +1,22 @@
-let i = 0;
+let timeTracker = 0;
 let minutes = 25;
 let started = false;
 
-const start = () => {
-    setTimeout(() => {
-       document.getElementById("currenttime").value = i;
-
-       if(i >= minutes) return; // Don't let the user cause the number to exceed the amount.
-
-       i++; // Add one to the count.
-
-       if(i <= minutes){
-        start();
-       }
-    }, 1000); // Wait for 1 minute.
-
-    for(let i = 0; i <= minutes; i++){
-        
-    }
-};
-
 const timer = () => {
-    document.getElementById("currenttime").style.color = "red";
+    started = true;
 
-    // Ensure the user can't press the button quickly to mess with the timer.
-    start();
+    let timer = setInterval(() => {
+        document.getElementById("currenttime").value = timeTracker;
+        timeTracker++;
+
+        if(timeTracker > minutes || !started){
+            clearInterval(timer);
+        }
+    }, 1000);
+}
+
+const reset = () => {
+    started = false;
+    timeTracker = 0;
+    document.getElementById("currenttime").value = timeTracker;
 };
