@@ -131,78 +131,83 @@ def main():
         except:
             print('There was a problem with the command line arguments. Please try again.')
     else:
-        # Returns a tuple of required information.
-        repetitions, minutes, subject = ask_user_for_control_variables()
+        print("Would you like to simply continuously study the Pomodoro technique or choose the session time?")
+        study_type_input = input('Enter "Pomodoro" or "normal": ')
+        study_type = "normal"
+        STUDY_TYPES = ('normal', 'pomodoro')
+        
+        if study_type_input.upper() == "POMODORO":
+            study_type = "pomodoro"
+        elif study_type_input.upper() == "NORMAL":
+            study_type = "normal"
+        else:
+            print("Study type input failed: User did not enter a valid option. Default value is \"normal\".")
 
-        # Print control variables as a response to the user's input. The lets them know what they entered.
-        print(
-            f'You want to study for {minutes} minute(s), {repetitions} time(s). You want to study for {subject}. Thanks!')
+        if study_type == STUDY_TYPES[0]:
+            # Returns a tuple of required information since the user has not passed in the data via the CLI.
+            repetitions, minutes, subject = ask_user_for_control_variables()
 
-        # Run the loop for the amount of repetitions specified.
-        for i in range(repetitions):
-            print(f'Beginning repetition #{i + 1}')
+            # Print control variables as a response to the user's input. The lets them know what they entered.
+            print(
+                f'You want to study for {minutes} minute(s), {repetitions} time(s). You want to study for {subject}. Thanks!')
 
-            for j in range(minutes):  # Run for the duration of each study period.
-                time.sleep(60)  # Pause for one minute.
-                # Notify the user whenever one minute has passed.
-                print(f'{j+1}', end=" ", flush=True)
+            # Run the loop for the amount of repetitions specified.
+            for i in range(repetitions):
+                print(f'Beginning repetition #{i + 1}')
 
-            # Only take a break if it is NOT the last repetition.
-            # Where i+1 is the current rep count.
-            if (i+1) != repetitions:
-                print('''
-                        $$ $$$$$ $$
-                        $$ $$$$$ $$
-                       .$$ $$$$$ $$.
-                       :$$ $$$$$ $$:
-                       $$$ $$$$$ $$$
-                       $$$ $$$$$ $$$
-                      ,$$$ $$$$$ $$$.                          Break Time. Play some games!
-                     ,$$$$ $$$$$ $$$$.
-                    ,$$$$; $$$$$ :$$$$.
-                   ,$$$$$  $$$$$  $$$$$.
-                 ,$$$$$$'  $$$$$  `$$$$$$.
-               ,$$$$$$$'   $$$$$   `$$$$$$$.
-            ,s$$$$$$$'     $$$$$     `$$$$$$$s.
-          $$$$$$$$$'       $$$$$       `$$$$$$$$$
-          $$$$$Y'          $$$$$          `Y$$$$$
-                    '''
-                    )
-                time.sleep(BREAK_TIME * 60)  # waits for the break time
+                for j in range(minutes):  # Run for the duration of each study period.
+                    time.sleep(60)  # Pause for one minute.
+                    # Notify the user whenever one minute has passed.
+                    print(f'{j+1}', end=" ", flush=True)
 
-                # Notify the user that the break is done.
-                print('The break is over. Type any phrase and hit ENTER to continue!')
-                while len(input().strip()) < 1:
-                    continue  # validate that the input is not empty
+                # Only take a break if it is NOT the last repetition.
+                # Where i+1 is the current rep count.
+                if (i+1) != repetitions:
+                    print('Break Time. Play some games!')
+                    time.sleep(BREAK_TIME * 60)  # waits for the break time
 
-                print('Continuing...\n\n\n\n')  # Print some spacing.
+                    # Notify the user that the break is done.
+                    print('The break is over. Type any phrase and hit ENTER to continue!')
+                    while len(input().strip()) < 1:
+                        continue  # validate that the input is not empty
 
-        print(
-            f'\n\nDone! Your study period for {subject} has completed. Please go enjoy your day now.')
+                    print('Continuing...\n\n\n\n')  # Print some spacing.
 
+            print(
+                f'\n\nDone! Your study period for {subject} has completed. Please go enjoy your day now.')
+        elif study_type == STUDY_TYPES[1]:
+            SESSION_LENGTH = 25 # in minutes
+            BREAK_TIME = 5 # in minutes
+            session_count = 0 # keeps track of how many times the user studied
+
+            while True:
+                for i in range(SESSION_LENGTH):
+                    session_count = session_count + 1
+                    print(f"Here comes the {session_count} session!")
+                    time.sleep(60)  # Pause for one minute.
+                    # Notify the user whenever one minute has passed.
+                    print(f'{j+1}', end=" ", flush=True)
+
+                # break time!
+                print("Break time!")
+                time.sleep( BREAK_TIME * 60 )
+                print('The break is over. Type any phrase and hit ENTER to continue, or type EXIT to stop!')
+                continue_or_exit = input('Phrase or "EXIT": ')
+                if continue_or_exit.upper == EXIT:
+                    break
+                else:
+                    continue
+            
+            repetitions = session_count
+            minutes = SESSION_LENGTH
+            subject = "None"
+    
     # Shorthand way of checking that the arguments are not null.
     if repetitions and minutes and subject:
         log_info((repetitions, minutes, subject), LOGGING_FILE)
     else:
-        print("ERROR: A required value was not given. Required values are repitions, minutes, and subject.")
+        print("ERROR: A required value was not given. Required values are repetitions, minutes, and subject.")
 
 
-def TEST_CASES():
-    '''
-        Runs a test one the data.
-    '''
-    repetitions = choice([1, 2, 3, 4, 5, 6, 7, 8, 9])
-    minutes = choice([1, 2, 3, 4, 5, 6, 7, 8, 9])
-    # The subject the user is studying.
-    subject = choice(['math', 'english', 'reading', 'nothing'])
-
-    log_info((repetitions, minutes, subject), TEST_LOGGING_FILE)
-
-
-IS_TESTING = False  # Controls whether to run the test code or not.
-
-if IS_TESTING:
-    for _ in range(150):
-        TEST_CASES()
-else:
+if __name__ == "__main__":
     main()
