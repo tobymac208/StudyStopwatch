@@ -3,22 +3,28 @@ let minutes = 25;
 let started = false;
 
 const timer = () => {
-    started = true;
-    document.getElementById("currenttime").style.color = "red";
+  var start = Date.now();
+  started = true;
 
-    let timer = setInterval(() => {
-        document.getElementById("currenttime").value = timeTracker;
-        timeTracker++;
+  let inter = setInterval(() => {
+    var delta = Date.now() - start; // milliseconds elapsed since start
+    secondsElapsed = Math.floor(delta / 1000);
 
-        if(timeTracker > minutes || !started){
-            clearInterval(timer);
-        }
-    }, 60*1000); // wait for a minute
-}
+    timeTracker++;
+    document.getElementById("currenttime").value = timeTracker;
+
+    if (secondsElapsed >= minutes || !started) {
+      clearInterval(inter); // stop the interval, and the timer.
+    }
+
+    // alternatively just show wall clock time:
+    output(new Date().toUTCString());
+  }, 1000); // update about every second
+};
 
 const reset = () => {
-    started = false;
-    timeTracker = 0;
-    document.getElementById("currenttime").value = timeTracker;
-    document.getElementById("currenttime").style.color = "black";
+  started = false;
+  timeTracker = 0;
+  document.getElementById("currenttime").value = timeTracker;
+  document.getElementById("currenttime").style.color = "black";
 };
