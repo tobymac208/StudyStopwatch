@@ -196,7 +196,7 @@ def main():
                 time.sleep( BREAK_TIME * 60 )
                 print('The break is over. Type any phrase and hit ENTER to continue, or type EXIT to stop!')
                 continue_or_exit = input('Phrase or "EXIT": ')
-                if continue_or_exit.upper == "EXIT":
+                if continue_or_exit.upper() == "EXIT":
                     break
                 else:
                     continue
