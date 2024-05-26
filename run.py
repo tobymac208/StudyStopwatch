@@ -132,6 +132,8 @@ def main():
             print('There was a problem with the command line arguments. Please try again.')
     else:
         print("Would you like to simply continuously study the Pomodoro technique or choose the session time?")
+
+        print("NOTE: Pomodoro means the timer will just run, no further input.\nNormal will ask you to enter three more pieces of information.")
         study_type_input = input('Enter "Pomodoro" or "normal": ')
         study_type = "normal"
         STUDY_TYPES = ('normal', 'pomodoro')
