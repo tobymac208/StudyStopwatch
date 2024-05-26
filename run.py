@@ -212,5 +212,16 @@ def main():
         print("ERROR: A required value was not given. Required values are repetitions, minutes, and subject.")
 
 
+TESTING = False
+
+def test():
+    log_info((2, 2, "test"), "test.json")
+
 if __name__ == "__main__":
-    main()
+    
+    if TESTING:
+        test()
+    else:
+        main()
+
+
