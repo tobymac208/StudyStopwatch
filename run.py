@@ -182,7 +182,7 @@ def main():
                     print(f'{i+1}', end=" ", flush=True)
 
                 # break time!
-                print("Break time!")
+                print("\n\n\t\tBreak time!")
                 time.sleep( BREAK_TIME * 60 )
                 print('The break is over. Type any phrase and hit ENTER to continue, or type EXIT to stop!')
                 continue_or_exit = input('Phrase or "EXIT": ')
