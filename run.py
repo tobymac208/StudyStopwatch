@@ -25,16 +25,6 @@ from random import choice
 LOGGING_FILE = "logfile.json"
 TEST_LOGGING_FILE = "test_logfile.json"
 
-WELCOME_MESSAGE = '''
-   .----.
-   |C>_ |
- __|____|__         Study Time!
-|  ______--|
-`-/.::::.\-'a
- `--------'
-	'''
-
-
 def ask_user_for_control_variables():
     '''
                 Returns A list of items. 
@@ -83,7 +73,7 @@ def format_user_input_to_json(data_structure, filename):
         except Exception as e:
             traceback.print_exc(e)
 
-    current_logs[str(unique_id)] = {
+    current_logs[str(unique_id)] = { # This will clobber any entry that already existed with the UUID given. I don't love this approach because of that.
         "name": data_structure[2],
         "repetitions": data_structure[0],
         "minutes": data_structure[1],
@@ -111,7 +101,7 @@ def main():
         Main program
     '''
 
-    print(WELCOME_MESSAGE)
+    print("Welcome! It's time to study.")
 
     repetitions = None
     minutes = None
@@ -131,8 +121,6 @@ def main():
         except:
             print('There was a problem with the command line arguments. Please try again.')
     else:
-        print("Would you like to simply continuously study the Pomodoro technique or choose the session time?")
-
         print("NOTE: Pomodoro means the timer will just run, no further input.\nNormal will ask you to enter three more pieces of information.")
         study_type_input = input('Enter "Pomodoro" or "normal": ')
         study_type = "normal"
@@ -225,5 +213,4 @@ if __name__ == "__main__":
         test()
     else:
         main()
-
 
