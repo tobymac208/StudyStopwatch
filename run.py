@@ -17,6 +17,7 @@ import traceback
 
 from os.path import exists
 from os import remove
+import os
 
 from datetime import date
 from random import choice
@@ -24,6 +25,7 @@ from random import choice
 
 LOGGING_FILE = "logfile.json"
 TEST_LOGGING_FILE = "test_logfile.json"
+
 
 def ask_user_for_control_variables():
     '''
@@ -121,11 +123,14 @@ def main():
         except:
             print('There was a problem with the command line arguments. Please try again.')
     else:
-        print("NOTE: Pomodoro means the timer will just run, no further input.\nNormal will ask you to enter three more pieces of information.")
+        print("NOTE: \"Pomodoro\" means the timer will just run, no further input.\n\"Normal\" will ask you to enter three more pieces of information.")
         study_type_input = input('Enter "Pomodoro" or "normal": ')
         study_type = "normal"
         STUDY_TYPES = ('normal', 'pomodoro')
         
+        # clear the screen
+        os.system('cls' if os.name == 'nt' else 'clear')
+
         if study_type_input.upper() == "POMODORO":
             study_type = "pomodoro"
         elif study_type_input.upper() == "NORMAL":
@@ -202,15 +207,12 @@ def main():
         print("ERROR: A required value was not given. Required values are repetitions, minutes, and subject.")
 
 
-TESTING = False
-
 def test():
     log_info((2, 2, "test"), "test.json")
 
 if __name__ == "__main__":
     
-    if TESTING:
+    if config.IS_TESTING:
         test()
     else:
         main()
-
