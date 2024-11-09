@@ -51,23 +51,39 @@ class StudyTimer:
     @classmethod
     def setup_logging(cls) -> None:
         """Configure secure logging with rotation and proper formatting"""
+        # Create logs directory if it doesn't exist
         cls.LOG_DIR.mkdir(exist_ok=True)
-        log_file = cls.LOG_DIR / "study_timer.log"
+        
+        # Runtime log file
+        runtime_log = cls.LOG_DIR / "runtime.log"
+        # Application log file
+        app_log = cls.LOG_DIR / "study_timer.log"
         
         # Ensure secure file permissions
-        log_file.touch(mode=0o600, exist_ok=True)
+        runtime_log.touch(mode=0o600, exist_ok=True)
+        app_log.touch(mode=0o600, exist_ok=True)
         
+        # Configure logging
         logging.basicConfig(
             level=logging.INFO,
             format='%(asctime)s - %(levelname)s - %(message)s',
             handlers=[
+                # Application logs with rotation
                 RotatingFileHandler(
-                    log_file,
+                    app_log,
                     maxBytes=1024*1024,  # 1MB
                     backupCount=3,
                     mode='a'
                 ),
-                logging.StreamHandler()
+                # Runtime logs (progress updates)
+                RotatingFileHandler(
+                    runtime_log,
+                    maxBytes=1024*1024,  # 1MB
+                    backupCount=3,
+                    mode='a'
+                ),
+                # Keep console output for errors only
+                logging.StreamHandler(sys.stderr)
             ]
         )
 
@@ -216,7 +232,11 @@ class StudyTimer:
             filename = Path(filename)
             data = cls.format_user_input_to_json(information_tuple, filename, overwrite)
             cls.safe_file_write(filename, data, overwrite)
-            logging.info(f"Successfully logged study session to {filename}")
+            
+            # Only log success message for main logfile, not temporary crash-recovery file
+            if filename == cls.LOGGING_FILE:
+                logging.info(f"Successfully logged study session to {filename}")
+                
         except Exception as e:
             logging.error(f"Failed to log study session: {type(e).__name__}")
             raise
@@ -224,7 +244,7 @@ class StudyTimer:
     @classmethod
     def run_normal_mode(cls, repetitions: int, minutes: int, 
                        subject: str, break_time: int) -> None:
-        """Run normal study mode with secure input validation"""
+        """Run normal study mode with secure input validation and minute updates"""
         try:
             repetitions = cls.validate_numeric_input(
                 repetitions, SecurityConfig.MAX_REPETITIONS, "Repetitions")
@@ -234,15 +254,25 @@ class StudyTimer:
                 break_time, SecurityConfig.MAX_MINUTES, "Break time")
             subject = cls.sanitize_input(subject)
 
-            print(f'Starting study session: {minutes} minute(s), '
-                  f'{repetitions} time(s), Subject: {subject}')
+            logging.info(f'Starting study session: {minutes} minute(s), '
+                        f'{repetitions} time(s), Subject: {subject}')
             
             for i in range(repetitions):
-                print(f"\nSession {i + 1} of {repetitions}")
-                time.sleep(minutes * 60)  # Convert to seconds
+                logging.info(f"Session {i + 1} of {repetitions}")
+                
+                # Session countdown
+                for minute in range(minutes, 0, -1):
+                    logging.info(f"Minutes remaining: {minute}")
+                    # Log current progress in case of crash
+                    cls.log_info((repetitions - i, minute, subject), cls.TEST_LOGGING_FILE, True)
+                    time.sleep(60)
+                
                 if i < repetitions - 1:  # No break after last session
-                    print(f"\nBreak time: {break_time} minutes")
-                    time.sleep(break_time * 60)
+                    logging.info(f"Break time: {break_time} minutes")
+                    # Break countdown
+                    for minute in range(break_time, 0, -1):
+                        logging.info(f"Break minutes remaining: {minute}")
+                        time.sleep(60)
 
         except ValueError as e:
             logging.error(f"Invalid parameters for normal mode: {str(e)}")
@@ -250,16 +280,26 @@ class StudyTimer:
 
     @classmethod
     def run_pomodoro_mode(cls) -> Tuple[int, int, str]:
-        """Run pomodoro mode with secure timing"""
+        """Run pomodoro mode with secure timing and minute-by-minute updates"""
         try:
             session_count = 0
             while True:
-                print(f"\nPomodoro session {session_count + 1}")
-                time.sleep(cls.POMODORO_SESSION_LENGTH * 60)
+                logging.info(f"Pomodoro session {session_count + 1}")
+                
+                # Session countdown
+                for minute in range(cls.POMODORO_SESSION_LENGTH, 0, -1):
+                    logging.info(f"Minutes remaining: {minute}")
+                    # Log current progress in case of crash
+                    cls.log_info((session_count + 1, minute, "Pomodoro"), cls.TEST_LOGGING_FILE, True)
+                    time.sleep(60)
                 
                 session_count += 1
-                print(f"\nBreak time: {cls.POMODORO_BREAK_TIME} minutes")
-                time.sleep(cls.POMODORO_BREAK_TIME * 60)
+                logging.info(f"Break time: {cls.POMODORO_BREAK_TIME} minutes")
+                
+                # Break countdown
+                for minute in range(cls.POMODORO_BREAK_TIME, 0, -1):
+                    logging.info(f"Break minutes remaining: {minute}")
+                    time.sleep(60)
 
         except KeyboardInterrupt:
             logging.info(f"Pomodoro mode ended after {session_count} sessions")
