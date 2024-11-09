@@ -1,10 +1,15 @@
 '''
-	Runs a timer for a specified amount of time, for a specified number
-	of minutes. For instance, 3,30 would run a timer 3 times for a duration
-	of 30 minutes.
-
-	Author: Nik F.
-	Date created: 04.15.2023
+    A study timer application that supports two modes:
+    1. Normal mode: Runs a configurable study timer with breaks
+       Example: "3,30,Math" runs 3 study sessions of 30 minutes each
+    2. Pomodoro mode: Runs continuous 25-minute sessions with 5-minute breaks
+    
+    Usage:
+    - Command line: python run.py <repetitions> <minutes> <subject>
+    - Interactive: Follow the prompts to choose mode and settings
+    
+    Author: Nik F.
+    Date created: 04.15.2023
 '''
 import time
 import config
@@ -28,32 +33,28 @@ TEST_LOGGING_FILE = "test_logfile.json"
 
 
 def ask_user_for_control_variables():
-    '''
-                Returns A list of items. 
-                                The items are either what the user entered or default values if the user entered invalid items.
-    '''
-    repetitions = None
-    minutes = None
-    subject = None
+    """Get study session parameters from user input.
+    
+    Returns:
+        tuple: (repetitions, minutes, subject) containing either user-provided values
+               or default values (3, 30, "Unspecified") if input is invalid
+    """
+    DEFAULT_REPETITIONS = 3
+    DEFAULT_MINUTES = 30
+    DEFAULT_SUBJECT = "Unspecified"
+    
+    prompt = ('Enter the number of reps, the length for each rep, and the subject you are studying.\n'
+             'Repetitions,minutes,subject: ')
 
-    user_input = input(
-        'Enter the number of reps, the length for each rep, and the subject you are studying.\nRepetitions,minutes,subject: ')
+    try:
+        user_input = input(prompt)
+        repetitions, minutes, subject = user_input.split(',')
+        return (int(repetitions), int(minutes), subject.strip())
 
-    try:  # Attempt to split the input into repetitions and minutes.
-        parts = user_input.split(',')
-
-        repetitions = int(parts[0])
-        minutes = int(parts[1])
-        subject = parts[2]
-
-    except Exception as e:
-        print(e)  # print the exception
-        print('Something occurred. Cannot process input.\nDefaulting to 3,30.')
-        repetitions = 3
-        minutes = 30
-        subject = "Unspecified"
-
-    return (repetitions, minutes, subject)
+    except (ValueError, IndexError) as e:
+        print(f'Invalid input: {str(e)}')
+        print(f'Defaulting to {DEFAULT_REPETITIONS} repetitions, {DEFAULT_MINUTES} minutes.')
+        return (DEFAULT_REPETITIONS, DEFAULT_MINUTES, DEFAULT_SUBJECT)
 
 
 def format_user_input_to_json(data_structure, filename):
