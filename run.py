@@ -4,15 +4,17 @@ import json
 import sys
 import time
 import logging
-from datetime import date
+import sqlite3
+import traceback
+from datetime import date, datetime
 from json.decoder import JSONDecodeError
 from pathlib import Path
-from typing import Tuple, Dict, Any, Optional
+from typing import Tuple, Dict, Any, Optional, List
 from uuid import uuid4
 import re
 import os
 from dataclasses import dataclass
-from logging.handlers import RotatingFileHandler
+from contextlib import contextmanager
 
 @dataclass
 class StudySession:
@@ -31,13 +33,11 @@ class SecurityConfig:
     ALLOWED_CHARS = re.compile(r'^[a-zA-Z0-9\s\-_]+$')
 
 class StudyTimer:
-    """A secure study timer application supporting normal and pomodoro study modes"""
+    """A secure study timer application supporting normal and pomodoro modes"""
     
-    # Secure path handling
+    # Base paths and database
     BASE_DIR = Path(__file__).parent.resolve()
-    LOGGING_FILE = BASE_DIR / "logfile.json"
-    TEST_LOGGING_FILE = BASE_DIR / "test_logfile.json"
-    LOG_DIR = BASE_DIR / "logs"
+    DB_PATH = BASE_DIR / "study_timer.db"
     
     # Application defaults
     DEFAULT_REPETITIONS = 3
@@ -48,40 +48,84 @@ class StudyTimer:
     POMODORO_SESSION_LENGTH = 25  # minutes
     POMODORO_BREAK_TIME = 5  # minutes
 
+    @staticmethod
+    @contextmanager
+    def get_db_connection():
+        """Secure database connection context manager"""
+        conn = None
+        try:
+            conn = sqlite3.connect(StudyTimer.DB_PATH)
+            conn.row_factory = sqlite3.Row
+            yield conn
+            conn.commit()
+        except Exception as e:
+            if conn:
+                conn.rollback()
+            raise
+        finally:
+            if conn:
+                conn.close()
+
+    @classmethod
+    def setup_database(cls):
+        """Initialize database tables"""
+        create_sessions_table = """
+        CREATE TABLE IF NOT EXISTS study_sessions (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            repetitions INTEGER NOT NULL,
+            minutes INTEGER NOT NULL,
+            date TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+        """
+        
+        create_runtime_logs_table = """
+        CREATE TABLE IF NOT EXISTS runtime_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            level TEXT NOT NULL,
+            message TEXT NOT NULL,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+        """
+        
+        create_temp_sessions_table = """
+        CREATE TABLE IF NOT EXISTS temp_sessions (
+            id INTEGER PRIMARY KEY,
+            name TEXT NOT NULL,
+            repetitions INTEGER NOT NULL,
+            minutes INTEGER NOT NULL
+        );
+        """
+        
+        with cls.get_db_connection() as conn:
+            conn.execute(create_sessions_table)
+            conn.execute(create_runtime_logs_table)
+            conn.execute(create_temp_sessions_table)
+
+    class DatabaseHandler(logging.Handler):
+        """Custom logging handler for SQLite database"""
+        def emit(self, record):
+            try:
+                with StudyTimer.get_db_connection() as conn:
+                    conn.execute(
+                        "INSERT INTO runtime_logs (level, message, timestamp) VALUES (?, ?, ?)",
+                        (record.levelname, record.getMessage(), datetime.now())
+                    )
+            except Exception:
+                self.handleError(record)
     @classmethod
     def setup_logging(cls) -> None:
-        """Configure secure logging with rotation and proper formatting"""
-        # Create logs directory if it doesn't exist
-        cls.LOG_DIR.mkdir(exist_ok=True)
+        """Configure logging with database handler"""
+        # Create and initialize the database
+        cls.setup_database()
         
-        # Runtime log file
-        runtime_log = cls.LOG_DIR / "runtime.log"
-        # Application log file
-        app_log = cls.LOG_DIR / "study_timer.log"
-        
-        # Ensure secure file permissions
-        runtime_log.touch(mode=0o600, exist_ok=True)
-        app_log.touch(mode=0o600, exist_ok=True)
-        
-        # Configure logging
         logging.basicConfig(
             level=logging.INFO,
             format='%(asctime)s - %(levelname)s - %(message)s',
             handlers=[
-                # Application logs with rotation
-                RotatingFileHandler(
-                    app_log,
-                    maxBytes=1024*1024,  # 1MB
-                    backupCount=3,
-                    mode='a'
-                ),
-                # Runtime logs (progress updates)
-                RotatingFileHandler(
-                    runtime_log,
-                    maxBytes=1024*1024,  # 1MB
-                    backupCount=3,
-                    mode='a'
-                ),
+                # Database handler for all logs
+                cls.DatabaseHandler(),
                 # Keep console output for errors only
                 logging.StreamHandler(sys.stderr)
             ]
@@ -107,56 +151,6 @@ class StudyTimer:
         except (ValueError, TypeError):
             logging.warning(f"Invalid {name} provided: {value}")
             raise ValueError(f"{name} must be between 1 and {max_value}")
-
-    @classmethod
-    def validate_file_path(cls, filepath: Path) -> bool:
-        """Validate file path is safe and within allowed directory"""
-        try:
-            filepath = Path(filepath).resolve()
-            return filepath.parent == cls.BASE_DIR.resolve()
-        except (TypeError, ValueError):
-            return False
-
-    @classmethod
-    def safe_file_read(cls, filepath: Path) -> Dict:
-        """Safely read JSON file with proper error handling"""
-        if not cls.validate_file_path(filepath):
-            logging.error(f"Invalid file path: {filepath}")
-            raise ValueError("Invalid file path")
-
-        try:
-            if filepath.exists():
-                if filepath.stat().st_size > SecurityConfig.MAX_FILE_SIZE:
-                    logging.error(f"File too large: {filepath}")
-                    raise ValueError("File exceeds size limit")
-                
-                with filepath.open('r') as file:
-                    return json.load(file)
-            return {}
-        except (OSError, JSONDecodeError) as e:
-            logging.error(f"File read error: {type(e).__name__}")
-            return {}
-
-    @classmethod
-    def safe_file_write(cls, filepath: Path, data: Dict, overwrite: bool = False) -> None:
-        """Safely write to JSON file with proper error handling"""
-        if not cls.validate_file_path(filepath):
-            logging.error(f"Invalid file path: {filepath}")
-            raise ValueError("Invalid file path")
-
-        try:
-            mode = 'w' if overwrite else 'w+'
-            with filepath.open(mode) as file:
-                if overwrite:
-                    file.seek(0)
-                    file.truncate()
-                json.dump(data, file, indent=2)
-                
-            # Set secure file permissions
-            os.chmod(filepath, 0o600)
-        except OSError as e:
-            logging.error(f"File write error: {type(e).__name__}")
-            raise
 
     @classmethod
     def ask_user_for_control_variables(cls) -> Tuple[int, int, str]:
@@ -195,56 +189,43 @@ class StudyTimer:
             return (cls.DEFAULT_REPETITIONS, cls.DEFAULT_MINUTES, cls.DEFAULT_SUBJECT)
 
     @classmethod
-    def format_user_input_to_json(cls, data_structure: Tuple[int, int, str], 
-                                 filename: Path, overwrite: bool = False) -> Dict:
-        """Format user input into JSON structure with validation"""
-        unique_id = str(uuid4())
-        current_logs = {} if overwrite else cls.safe_file_read(filename)
-
-        session = StudySession(
-            name=cls.sanitize_input(data_structure[2]),
-            repetitions=cls.validate_numeric_input(
-                data_structure[0], 
-                SecurityConfig.MAX_REPETITIONS,
-                "Repetitions"
-            ),
-            minutes=cls.validate_numeric_input(
-                data_structure[1],
-                SecurityConfig.MAX_MINUTES,
-                "Minutes"
-            ),
-            date=str(date.today())
-        )
-
-        current_logs[unique_id] = {
-            "name": session.name,
-            "repetitions": session.repetitions,
-            "minutes": session.minutes,
-            "date": session.date
-        }
-        return current_logs
-
-    @classmethod
     def log_info(cls, information_tuple: Tuple[int, int, str], 
-                 filename: Path, overwrite: bool = False) -> None:
-        """Safely log study session information"""
+                 is_temporary: bool = False) -> None:
+        """Log study session information to database"""
         try:
-            filename = Path(filename)
-            data = cls.format_user_input_to_json(information_tuple, filename, overwrite)
-            cls.safe_file_write(filename, data, overwrite)
+            repetitions, minutes, subject = information_tuple
             
-            # Only log success message for main logfile, not temporary crash-recovery file
-            if filename == cls.LOGGING_FILE:
-                logging.info(f"Successfully logged study session to {filename}")
-                
+            # Validate inputs
+            repetitions = cls.validate_numeric_input(
+                repetitions, SecurityConfig.MAX_REPETITIONS, "Repetitions")
+            minutes = cls.validate_numeric_input(
+                minutes, SecurityConfig.MAX_MINUTES, "Minutes")
+            subject = cls.sanitize_input(subject)
+            
+            # Only log permanent sessions (not temporary crash recovery)
+            if not is_temporary:
+                with cls.get_db_connection() as conn:
+                    conn.execute("""
+                        INSERT INTO study_sessions (id, name, repetitions, minutes, date)
+                        VALUES (?, ?, ?, ?, ?)
+                    """, (str(uuid4()), subject, repetitions, minutes, str(date.today())))
+                    logging.info(f"Successfully logged study session for {subject}")
+            
+            # For temporary crash recovery, store in temp_sessions table
+            else:
+                with cls.get_db_connection() as conn:
+                    conn.execute("""
+                        INSERT OR REPLACE INTO temp_sessions (id, name, repetitions, minutes)
+                        VALUES (1, ?, ?, ?)
+                    """, (subject, repetitions, minutes))
+                    
         except Exception as e:
             logging.error(f"Failed to log study session: {type(e).__name__}")
             raise
-
     @classmethod
     def run_normal_mode(cls, repetitions: int, minutes: int, 
                        subject: str, break_time: int) -> None:
-        """Run normal study mode with secure input validation and minute updates"""
+        """Run normal study mode with database logging"""
         try:
             repetitions = cls.validate_numeric_input(
                 repetitions, SecurityConfig.MAX_REPETITIONS, "Repetitions")
@@ -263,8 +244,8 @@ class StudyTimer:
                 # Session countdown
                 for minute in range(minutes, 0, -1):
                     logging.info(f"Minutes remaining: {minute}")
-                    # Log current progress in case of crash
-                    cls.log_info((repetitions - i, minute, subject), cls.TEST_LOGGING_FILE, True)
+                    # Log temporary progress
+                    cls.log_info((repetitions - i, minute, subject), is_temporary=True)
                     time.sleep(60)
                 
                 if i < repetitions - 1:  # No break after last session
@@ -280,17 +261,16 @@ class StudyTimer:
 
     @classmethod
     def run_pomodoro_mode(cls) -> Tuple[int, int, str]:
-        """Run pomodoro mode with secure timing and minute-by-minute updates"""
+        """Run pomodoro mode with database logging"""
         try:
             session_count = 0
             while True:
                 logging.info(f"Pomodoro session {session_count + 1}")
                 
-                # Session countdown
                 for minute in range(cls.POMODORO_SESSION_LENGTH, 0, -1):
                     logging.info(f"Minutes remaining: {minute}")
-                    # Log current progress in case of crash
-                    cls.log_info((session_count + 1, minute, "Pomodoro"), cls.TEST_LOGGING_FILE, True)
+                    # Log temporary progress
+                    cls.log_info((session_count + 1, minute, "Pomodoro"), is_temporary=True)
                     time.sleep(60)
                 
                 session_count += 1
@@ -306,6 +286,27 @@ class StudyTimer:
             return (session_count, cls.POMODORO_SESSION_LENGTH, "Pomodoro")
 
     @classmethod
+    def get_study_history(cls) -> List[Dict]:
+        """Retrieve study session history"""
+        with cls.get_db_connection() as conn:
+            cursor = conn.execute("""
+                SELECT * FROM study_sessions 
+                ORDER BY created_at DESC
+            """)
+            return [dict(row) for row in cursor.fetchall()]
+
+    @classmethod
+    def get_runtime_logs(cls, limit: int = 100) -> List[Dict]:
+        """Retrieve recent runtime logs"""
+        with cls.get_db_connection() as conn:
+            cursor = conn.execute("""
+                SELECT * FROM runtime_logs 
+                ORDER BY timestamp DESC 
+                LIMIT ?
+            """, (limit,))
+            return [dict(row) for row in cursor.fetchall()]
+
+    @classmethod
     def main(cls) -> None:
         """Main application entry point with secure execution"""
         cls.setup_logging()
@@ -314,7 +315,7 @@ class StudyTimer:
         try:
             print("Welcome! It's time to study.")
             
-            # Handle CLI arguments securely
+            # Handle CLI arguments
             if len(sys.argv) == 4:
                 try:
                     repetitions = cls.validate_numeric_input(
@@ -323,7 +324,7 @@ class StudyTimer:
                         sys.argv[2], SecurityConfig.MAX_MINUTES, "Minutes")
                     subject = cls.sanitize_input(sys.argv[3])
                     
-                    cls.log_info((repetitions, minutes, subject), cls.LOGGING_FILE)
+                    cls.log_info((repetitions, minutes, subject))
                     cls.run_normal_mode(repetitions, minutes, subject, cls.POMODORO_BREAK_TIME)
                     return
                 except ValueError as e:
@@ -336,11 +337,11 @@ class StudyTimer:
 
             if mode == "1":
                 user_input = cls.ask_user_for_control_variables()
-                cls.log_info(user_input, cls.LOGGING_FILE)
+                cls.log_info(user_input)
                 cls.run_normal_mode(*user_input, cls.POMODORO_BREAK_TIME)
             elif mode == "2":
                 result = cls.run_pomodoro_mode()
-                cls.log_info(result, cls.LOGGING_FILE)
+                cls.log_info(result)
             else:
                 logging.warning(f"Invalid mode selected: {mode}")
                 print("Invalid mode selected. Please try again.")
@@ -355,7 +356,7 @@ class StudyTimer:
         """Test method with secure execution"""
         cls.setup_logging()
         try:
-            cls.log_info((2, 2, "test"), cls.TEST_LOGGING_FILE, True)
+            cls.log_info((2, 2, "test"))
             logging.info("Test completed successfully")
         except Exception as e:
             logging.error(f"Test failed: {type(e).__name__}: {str(e)}")

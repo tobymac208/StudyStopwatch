@@ -1,1 +1,46 @@
-- Creates a temp file to store current study time data in case the program is terminated prematurely. 11/8/24
+# November 2024 Changes
+
+## Database Integration
+- Replaced file-based logging with SQLite database
+- Added three tables:
+  - study_sessions: Stores completed study sessions
+  - runtime_logs: Stores application logs and progress updates
+  - temp_sessions: Handles crash recovery data
+- Added database connection context manager for secure transactions
+- Implemented automatic database initialization
+
+## Security Improvements
+- Added input validation and sanitization
+- Implemented secure file path handling
+- Added maximum value constraints for numeric inputs
+- Added character whitelist for text inputs
+- Improved error handling and logging
+- Added secure file permissions
+
+## Logging Improvements
+- Moved runtime logs to SQLite database
+- Added structured logging with timestamps
+- Separated permanent and temporary session logging
+- Added log rotation capabilities
+- Limited console output to errors only
+- Added detailed logging for debugging and monitoring
+
+## Code Organization
+- Created SecurityConfig class for security constants
+- Added StudySession dataclass for data validation
+- Implemented type hints throughout the code
+- Added proper documentation for all methods
+- Improved error messages and user feedback
+
+## New Methods
+- get_db_connection(): Secure database context manager
+- setup_database(): Database initialization
+- get_study_history(): Retrieve past study sessions
+- get_runtime_logs(): Access application logs
+- DatabaseHandler: Custom logging handler for SQLite
+
+## Bug Fixes
+- Fixed crash recovery logging
+- Improved error handling for invalid inputs
+- Fixed file permission issues
+- Added proper cleanup for database connections
